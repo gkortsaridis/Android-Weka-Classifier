@@ -27,7 +27,7 @@ import weka.core.Instances;
 
 public class MainActivity extends Activity {
 
-    TextView tv;
+    TextView correctly,correctly_perc,incorrectly,incorrectly_perc,kappa,mae,rmse,rae,rrse,number,accuracy,detailed_accuracy,confusion_matrix,info;
     String result;
 
     Classifier[] models = {
@@ -45,6 +45,15 @@ public class MainActivity extends Activity {
 
     int datas[] = {
             R.raw.iris,
+            R.raw.breast_cancer,
+            R.raw.dermatology,
+            R.raw.ecoli,
+            R.raw.hepatitis,
+            R.raw.labor,
+            R.raw.liver_disorders,
+            R.raw.lung_cancer,
+            R.raw.lymph,
+            R.raw.primary_tumor
     };
 
     @Override
@@ -52,7 +61,20 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        tv = (TextView) findViewById(R.id.tv1);
+        correctly = (TextView) findViewById(R.id.correctly_classified);
+        correctly_perc = (TextView) findViewById(R.id.correctly_classified_perc);
+        incorrectly = (TextView) findViewById(R.id.incorrectly_classified);
+        incorrectly_perc = (TextView) findViewById(R.id.incorreclty_classified_perc);
+        kappa = (TextView) findViewById(R.id.kappa);
+        mae = (TextView) findViewById(R.id.mae);
+        rmse = (TextView) findViewById(R.id.rmse);
+        rae = (TextView) findViewById(R.id.rae);
+        rrse = (TextView) findViewById(R.id.rrse);
+        number = (TextView) findViewById(R.id.number_instances);
+        accuracy = (TextView) findViewById(R.id.accuracy);
+        detailed_accuracy = (TextView) findViewById(R.id.detailed_accuracy);
+        confusion_matrix = (TextView) findViewById(R.id.confusion_matrix);
+        info = (TextView) findViewById(R.id.info);
 
         int classifier = getIntent().getExtras().getInt("classifier");
         int folds = 10 - getIntent().getExtras().getInt("folds");
@@ -66,7 +88,6 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
 
-        tv.setText(result);
     }
 
     public String Classify(int which_model , int which_file , int folds) throws Exception {
@@ -101,55 +122,51 @@ public class MainActivity extends Activity {
         }
 
         // Calculate overall accuracy of current classifier on all splits
-        double accuracy = calculateAccuracy(predictions);
-        String result = "Accuracy of " + models[which_model].getClass().getSimpleName() + ": "
-                + String.format("%.2f%%", accuracy)
-                + "\n---------------------------------\n";
+        double accuracyD = calculateAccuracy(predictions);
+        accuracy.setText("Classifier Accuracy : "+String.format("%.2f%%", accuracyD));
 
         //Printing results of the model
-        output += models[which_model].toString() + "\n";
-        output += validation.toSummaryString() + "\n";
-        output += validation.toClassDetailsString() + "\n";
-        output += validation.toMatrixString() + "\n";
-        output += result + "\n";
+        /*output += models[which_model].toString();
+
+        output +="\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+        output +=  "~~~~~~~~~~~SUMMARY~~~~~~~~~~~\n";
+        output +="~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+        output += validation.toSummaryString();
+
+        output +="\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+        output +=  "~~~~~~~~~~~Class Details~~~~~~~~~~\n";
+        output +="~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
+        output += validation.toClassDetailsString();
+
+        output +="\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+        output +=  "~~~~~~~~Simulation Matrix~~~~~~~~~~\n";
+        output +="~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";
+        output += validation.toMatrixString();
+
+        accur.setText(result);*/
+
+        //output +="~~~~~~~~~~~~~~~~~~";
+        //output += result + "\n";
         //System.out.println(models[which_model].toString());
         //System.out.println(validation.toSummaryString());
         //System.out.println(validation.toClassDetailsString());
         //System.out.println(validation.toMatrixString());
         //System.out.println(result);
 
-        /*output +="VALIDATION SUMMARY\n";
-        output += "Kappa "+validation.kappa()+"\n";
-        output += "Correct "+validation.correct()+"\n";
-        output += "Incorrect "+validation.incorrect()+"\n";
-        output += "Correct Pososto "+validation.pctCorrect()+"\n";
-        output += "Incorrect Pososto "+validation.pctIncorrect()+"\n";
-        output += "Mean absolute error "+validation.meanAbsoluteError()+"\n";
-        output += "Root mean squared error "+validation.rootMeanSquaredError()+"\n";
-        output += "Relative absolute error "+validation.relativeAbsoluteError()+"\n";
-        output += "Root relative squared error "+validation.rootRelativeSquaredError()+"\n";
-        output += "Total number of instances "+validation.numInstances()+"\n";
-        output += "=======================================\n\n";
+        correctly.setText((int)validation.correct()+"");
+        correctly_perc.setText(String.format("%.2f", validation.pctCorrect()));
+        incorrectly.setText((int)validation.incorrect()+"");
+        incorrectly_perc.setText(String.format("%.2f", validation.pctIncorrect()));
+        kappa.setText(String.format("%.2f", validation.kappa()));
+        mae.setText(String.format("%.2f", validation.meanAbsoluteError()));
+        rmse.setText(String.format("%.2f", validation.rootMeanSquaredError()));
+        rae.setText(String.format("%.2f", validation.relativeAbsoluteError()));
+        rrse.setText(String.format("%.2f", validation.rootRelativeSquaredError()));
+        number.setText((int)validation.numInstances()+"");
 
-        for(int i=0; i<validation.getClassPriors().length; i++)
-            output += "TP Rate "+i+" : "+validation.truePositiveRate(i)+"\n";
-        output += "TP Rate Weighted AVG : "+validation.weightedTruePositiveRate()+"\n";
-
-        for(int i=0; i<validation.getClassPriors().length; i++)
-            output += "FP Rate "+i+" : "+validation.falsePositiveRate(i)+"\n";
-        output += "FP Rate Weighted AVG : "+validation.weightedFalsePositiveRate()+"\n";
-
-        for(int i=0; i<validation.getClassPriors().length; i++)
-            output += "Precision"+i+" : "+validation.precision(i)+"\n";
-        output += "Precision Weighted AVG : "+validation.weightedPrecision()+"\n";
-
-        for(int i=0; i<validation.getClassPriors().length; i++)
-            output += "F-Measure Rate "+i+" : "+validation.fMeasure(i)+"\n";
-        output += "F-Measure Weighted AVG : "+validation.weightedFMeasure()+"\n";
-
-        for(int i=0; i<validation.getClassPriors().length; i++)
-            output += "ROC Area "+i+" : "+validation.areaUnderROC(i)+"\n";
-        output += "ROC Area Weighted AVG : "+validation.weightedAreaUnderROC()+"\n";*/
+        detailed_accuracy.setText(validation.toClassDetailsString());
+        confusion_matrix.setText(validation.toMatrixString());
+        info.setText(models[which_model].toString());
 
         return output;
     }

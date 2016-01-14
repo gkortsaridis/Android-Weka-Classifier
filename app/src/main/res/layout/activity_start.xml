@@ -16,7 +16,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="My custom Weka classifier"/>
+            android:text="My custom Weka classifier"
+            android:textStyle="bold|italic"
+            android:textSize="17sp"
+            android:textColor="#ffffff" />
 
     </Toolbar>
 
@@ -94,6 +97,14 @@
         android:layout_height="wrap_content"
         android:text="Classify the shit out of me"
         android:onClick="classify"
+        android:id="@+id/classify"
         android:layout_below="@+id/folds"/>
+
+    <Button
+        android:layout_below="@+id/classify"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="About"
+        android:onClick="about"/>
 
 </RelativeLayout>
